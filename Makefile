@@ -1,6 +1,10 @@
-all:	test_assign3
-test_assign3: test_assign3_1.c 
-	gcc dberror.c storage_mgr.c test_assign3_1.c -o test_assign3_1 buffer_mgr.c dt.h buffer_mgr_stat.c record_mgr.c tables.h expr.c expr.h test_helper.h rm_serializer.c -lm
+assignment3: test_assign3_1.o dberror.o test_expr.o record_mgr.o rm_serializer.o storage_mgr.o buffer_mgr.o buffer_mgr_stat.o expr.o
+	gcc -w -o test_assign3_1 dberror.c record_mgr.c rm_serializer.c storage_mgr.c buffer_mgr.c buffer_mgr_stat.c test_assign3_1.c expr.c
+	gcc -w -o test_expr dberror.c record_mgr.c rm_serializer.c storage_mgr.c buffer_mgr.c buffer_mgr_stat.c test_expr.c expr.c
+
+%.o: %.c
+	gcc -w -g -c $<
+
 run:
 	./test_assign3_1
 
