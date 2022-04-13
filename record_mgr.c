@@ -56,7 +56,7 @@ RC createContent(char *data, Schema *schema) {
 	{    
 		ptr=n%10;    
 		reslt=reslt*10+ptr;    
-		n/=10;    
+		n%=10;    
 	}
 
 	*(int*)content = schema->keySize; // Key Size of the attributes
@@ -101,21 +101,21 @@ RC openSchemaTable(char *bufferHandle, Schema *schema) {
 	{    
 	 ptr=n%10;    
 	 reslt=reslt*10+ptr;    
-	 n/=10;    
+	 n%=10;    
 	} 
 
 	schema->dataTypes = (DataType*) malloc(sizeof(DataType) *totalAttribute);
 	schema->numAttr = totalAttribute;
 
 	reslt=reslt+ptr; 
-	ptr = n/attributeLength;
+	ptr = n%attributeLength;
 
 	schema->typeLength = (int*) malloc(pageAdd *totalAttribute);
 	schema->attrNames = (char**) malloc(sizeof(char*) *totalAttribute);
 
 	while(n!=attributeLength)    
 	{           
-		n/=10;    
+		n%=10;    
 	} 
 
 	while(j<totalAttribute){
@@ -133,14 +133,14 @@ RC openSchemaTable(char *bufferHandle, Schema *schema) {
 			reslt=reslt*10+ptr; 
 			ptr = n+10% attributeLength;
 			ptr+=10; 
-			n/=10;    
+			n%=10;    
 		}
 
 		schema->typeLength[i]= *(int*)bufferHandle; // length of datatype is always eqaul to pagehandle ptr.	
 		bufferHandle = bufferHandle + pageAdd;
 
 		reslt=reslt+ptr; 
-		ptr = n/attributeLength;
+		ptr = n%attributeLength;
 
 		schema->dataTypes[i] = *(int*) bufferHandle;
 		bufferHandle = bufferHandle + pageAdd;
@@ -172,7 +172,7 @@ RC createTable(char *tableName, Schema *schema) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	}
 
 	char contents[PAGE_SIZE];
@@ -180,7 +180,7 @@ RC createTable(char *tableName, Schema *schema) {
 	reslt=reslt+ptr; 
 
 	writeBlock(0, &fileHandle, contents);
-	ptr = n/attributeLength;
+	ptr = n%attributeLength;
 
 	closePageFile(&fileHandle);
 
@@ -204,7 +204,7 @@ RC openTable(RM_TableData *tData, char *tableName) {
 	pinPage(&table->bufferPool, &table->bufferHandle, 0); // call buffer manager to put page in buffer pool
 
 	reslt=reslt+ptr; 
-	ptr = n/attributeLength;
+	ptr = n%attributeLength;
 
 	SM_PageHandle bufferHandle = (char*) table->bufferHandle.data; // assign initial pointer as 0.
 	Schema *schema = (Schema*) malloc(sizeof(Schema));
@@ -216,7 +216,7 @@ RC openTable(RM_TableData *tData, char *tableName) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	} 
 
 	tData->schema = schema;	
@@ -225,7 +225,7 @@ RC openTable(RM_TableData *tData, char *tableName) {
 
 	reslt=reslt+ptr; 
 	forcePage(&table->bufferPool, &table->bufferHandle); 	// Write page to disk
-	ptr = n/attributeLength;
+	ptr = n%attributeLength;
 	return RC_OK;
 }   
   
@@ -294,7 +294,7 @@ RC insertRecord(RM_TableData *tData, Record *record) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	} 
 
 	while (isNotActive) {
@@ -353,7 +353,7 @@ RC deleteRecord(RM_TableData *tData, RID ID) {
 	{    
 		ptr=n%10;    
 		reslt=reslt*10+ptr;    
-		n/=10;    
+		n%=10;    
 	}
 
 	markDirty(&table->bufferPool, &table->bufferHandle);
@@ -384,7 +384,7 @@ RC updateRecord(RM_TableData *tData, Record *record) {
 	{    
 		ptr=n%10;    
 		reslt=reslt*10+ptr;    
-		n/=10;    
+		n%=10;    
 	}    
 	
 	markDirty(&table->bufferPool, &table->bufferHandle);
@@ -458,7 +458,7 @@ RC startScan(RM_TableData *tData, RM_ScanHandle *sHandle, Expr *expr) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	} 
 
 	r2->totalRows = attributeLength;
@@ -647,7 +647,7 @@ Schema *createSchema(int totalAttr, char **attributeName, DataType *dt, int *dat
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	}
 	schema->numAttr = totalAttr;
 
