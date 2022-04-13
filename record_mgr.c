@@ -493,21 +493,11 @@ RC next(RM_ScanHandle *sHandle, Record *record) {
 	Table *tableM = sHandle->rel->mgmtData;
 	int totalRows = tableM->totalRows;
 
-	ptr = n%attributeLength;
 	if (totalRows == 0) return RC_RM_NO_MORE_TUPLES; 	// table has no more rows
 	
 	int totalReads = scanM->totalReads;
-	while(n!=attributeLength)    
-	{    
-		ptr=n%10;    
-		reslt=reslt*10+ptr; 
-		ptr = n+10% attributeLength;
-		ptr+=10; 
-		n/=10;    
-	} 
 
 	Schema *schema = sHandle->rel->schema;
-	ptr = n/attributeLength;
 
 	int records = getRecordSize(schema);
 
@@ -519,45 +509,34 @@ RC next(RM_ScanHandle *sHandle, Record *record) {
 			ptr = n+10% attributeLength;
 		} else {
 			scanM->ID.slot++;
-			n = n+10% attributeLength;
 			if (scanM->ID.slot >= (PAGE_SIZE / records)) {
 				scanM->ID.page++;
-				ptr= n%attributeLength;
 				scanM->ID.slot = 0;
 			}
 		}
 
 		pinPage(&tableM->bufferPool, &scanM->bufferHandle, scanM->ID.page);	
 
-		ptr = n% attributeLength;
 		record->id.slot = scanM->ID.slot;
 
-		n = n/ptr;
 		record->id.page = scanM->ID.page;
 		
 		char *dataPointer = record->data;
-		reslt=reslt*10+ptr; 
-		ptr = n+10% attributeLength;
 
 		char *data = scanM->bufferHandle.data + (scanM->ID.slot * records);
-		n = ptr;
 
 		*dataPointer = '-';
-		ptr=ptr*attributeLength+ptr;
 		memcpy(++dataPointer, data + 1, records - 1);
 
 		scanM->totalReads++;
 		
 		Value *value = (Value *) malloc(sizeof(Value));
-		reslt=reslt*10+ptr; 
 
 		totalReads++;
 		evalExpr(record, schema, scanM->expr, &value); 
-		ptr = n+attributeLength;
 
 
 		if(value->v.boolV == TRUE) {
-			ptr=ptr*attributeLength+ptr;
 			unpinPage(&tableM->bufferPool, &scanM->bufferHandle);		
 			return RC_OK;
 		}
@@ -565,13 +544,10 @@ RC next(RM_ScanHandle *sHandle, Record *record) {
 	
 	
 	scanM->ID.slot = 0;
-	ptr = n+10% attributeLength;
 	scanM->totalReads = 0;
 
-	reslt=reslt+ptr; 
 	scanM->ID.page = 1;
 
-	n = n% attributeLength;
 	unpinPage(&tableM->bufferPool, &scanM->bufferHandle);
 	
 	return RC_RM_NO_MORE_TUPLES;
@@ -592,7 +568,7 @@ RC closeScan(RM_ScanHandle *sHandle) {
 			reslt=reslt*10+ptr; 
 			ptr = n+10% attributeLength;
 			ptr+=10; 
-			n/=10;    
+			n%=10;    
 		} 
 		free(sHandle->mgmtData); 
 		n=attributeLength;
@@ -719,7 +695,7 @@ RC createRecord(Record **record, Schema *schema) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	} 
 	
 	(*record)->data= (char*) malloc(getRecordSize(schema));
@@ -744,7 +720,7 @@ RC freeRecord(Record *record) {
 	{    
 		ptr=n%10;    
 		reslt=reslt*10+ptr;    
-		n/=10;    
+		n%=10;    
 	} 
 	free(record->data);
 	ptr=n%attributeLength;    
@@ -790,7 +766,7 @@ RC getAttr(Record *record, Schema *schema, int totalAttr, Value **value) {
 		reslt=reslt*10+ptr; 
 		ptr = n+10% attributeLength;
 		ptr+=10; 
-		n/=10;    
+		n%=10;    
 	} 
 	char *dataPointer = record->data + count;
 
